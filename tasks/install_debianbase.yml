@@ -1,0 +1,5 @@
+- name: Install needed packages for samba domain controller
+  ansible.builtin.apt:
+    name: "{{ debian_packages }}"
+    state: present
+    update_cache: true

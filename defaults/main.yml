@@ -1,0 +1,8 @@
+samba_dnsbackend: SAMBA_INTERNAL
+samba_dnsforwarder: 1.1.1.1
+samba_timezone: Europe/Berlin
+
+# this is only for quick labs
+samba_netbios_domainname: SAMBA
+samba_domainname: SAMBA.LOCAL
+samba_adminpwd: Start1234

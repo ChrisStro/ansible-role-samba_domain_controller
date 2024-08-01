@@ -1,0 +1,21 @@
+- name: Prepare machine for samba
+  ansible.builtin.import_tasks: prepare.yml
+  tags:
+    - samba_prepare
+
+- name: Install debian based machine for samba
+  ansible.builtin.import_tasks: install_debianbase.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+- name: Create new active directory domain
+  ansible.builtin.import_tasks: new_domain.yml
+  tags:
+    - samba_newdomain
+
+- name: Update systemd-resolved configuration
+  ansible.builtin.import_tasks: resolved.yml
+  tags:
+    - samba_resolved
+
+- name: Enforce handlers
+  ansible.builtin.meta: flush_handlers

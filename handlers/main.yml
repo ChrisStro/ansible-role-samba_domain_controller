@@ -1,0 +1,30 @@
+- name: Restart smbd
+  ansible.builtin.service:
+    name: smbd
+    state: restarted
+  become: true
+
+# Windows service discovery daemon
+- name: Restart wsdd
+  ansible.builtin.service:
+    name: wsdd
+    state: restarted
+  become: true
+
+# winbind
+- name: Disable winbind
+  ansible.builtin.systemd:
+    name: winbind
+    enabled: false
+    masked: true
+    state: stopped
+  become: true
+
+# samba domain controller
+- name: Enable samba-ad-dc
+  ansible.builtin.systemd:
+    name: samba-ad-dc
+    enabled: true
+    masked: false
+    state: restarted
+  become: true

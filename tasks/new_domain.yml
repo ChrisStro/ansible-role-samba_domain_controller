@@ -1,0 +1,67 @@
+- name: Checking if domain exists via tagfile
+  ansible.builtin.stat:
+    path: /var/log/.new_domain_created
+  register: new_domain_created_check
+
+- name: Promote new samba domain controller
+  when: not new_domain_created_check.stat.exists
+  block:
+    - name: Temporaly disable services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: false
+        masked: true
+        state: stopped
+      become: true
+      loop:
+        - smbd
+        - nmbd
+        - winbind
+
+    - name: Backup smb.conf
+      ansible.builtin.command: mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
+      args:
+        creates: /etc/samba/smb.conf.bak
+
+    - name: Run samba-tool domain provision
+      ansible.builtin.command:
+        argv:
+          - samba-tool
+          - domain
+          - provision
+          - --use-rfc2307
+          - --realm={{ samba_domainname }}
+          - --domain={{ samba_netbios_domainname }}
+          - --adminpass={{ samba_adminpwd }}
+          - --server-role=dc
+          - --backend-store=mdb
+          - --dns-backend={{ samba_dnsbackend }}
+      become: true
+      changed_when: true
+      notify:
+        - Enable samba-ad-dc
+        - Restart wsdd
+        - Disable winbind
+
+    - name: Copy generated kerberos-file to /etc
+      ansible.builtin.copy:
+        src: /var/lib/samba/private/krb5.conf
+        remote_src: true
+        dest: /etc/krb5.conf
+        mode: '644'
+
+    - name: Copy templated smb.conf
+      ansible.builtin.template:
+        src: templates/smb.conf.j2
+        dest: /etc/samba/smb.conf
+        mode: '644'
+
+    - name: Set Administrator password to never expire
+      ansible.builtin.command: samba-tool user setexpiry Administrator --noexpiry
+      changed_when: true
+
+    - name: Create tagfile to prevent overprovisioning
+      ansible.builtin.file:
+        dest: /var/log/.new_domain_created
+        state: touch
+        mode: '644'

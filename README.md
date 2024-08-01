@@ -1,0 +1,11 @@
+# Ansible Role: samba_domain_controller
+
+## Role Variables
+
+Available variables are listed below, along with default values (see `defaults/main.yml`):
+```yaml
+# This is only for quick labs
+samba_netbios_domainname: SAMBA
+samba_domainname: SAMBA.LOCAL
+samba_adminpwd: Start1234
+```
