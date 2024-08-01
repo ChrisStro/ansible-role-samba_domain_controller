@@ -1,5 +1,8 @@
 # Ansible Role: samba_domain_controller
 
+## WARNING
+This role does not support multible hosts atm!!!! You end up with multible primary domain controllers hosting the same domain. Support for multible hosts will be added in the future if needed.
+
 ## Role Variables
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
